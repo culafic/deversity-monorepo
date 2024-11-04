@@ -1,0 +1,26 @@
+{
+  "name": "deversity-service",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "apps/deversity-service/src",
+  "projectType": "application",
+  "tags": [],
+  "targets": {
+    "serve": {
+      "executor": "@nx/js:node",
+      "defaultConfiguration": "development",
+      "dependsOn": ["build"],
+      "options": {
+        "buildTarget": "deversity-service:build",
+        "runBuildTargetDependencies": false
+      },
+      "configurations": {
+        "development": {
+          "buildTarget": "deversity-service:build:development"
+        },
+        "production": {
+          "buildTarget": "deversity-service:build:production"
+        }
+      }
+    }
+  }
+}
