@@ -1,0 +1,19 @@
+{
+  "name": "saga-store",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/saga-store/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/saga-store",
+        "main": "libs/saga-store/src/index.ts",
+        "tsConfig": "libs/saga-store/tsconfig.lib.json",
+        "assets": ["libs/saga-store/*.md"]
+      }
+    }
+  },
+  "tags": []
+}
