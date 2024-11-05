@@ -10,17 +10,39 @@ export class AppointmentService {
     return minutes === 0 || minutes === 30;
   }
 
-  async getAllAppointments(id) {
-    try {
-      const saga = await this.sagaService.get<any>(id);
-      return saga;
-    } catch (error) {
-      return;
+  async getAppointments(sagaId: string) {
+    const saga = await this.sagaService.get<any>(sagaId);
+    return saga.appointments;
+  }
+
+  async isOverlapping(
+    newStartTime: Date,
+    newDuration: number,
+    sagaId: string
+  ): Promise<boolean> {
+    const newEndTime = new Date(newStartTime.getTime() + newDuration * 60000);
+    const appointments = await this.getAppointments(sagaId);
+
+    for (let appointment of appointments) {
+      const appointmentEndTime = new Date(
+        appointment.startTime.getTime() + appointment.duration * 60000
+      );
+
+      if (
+        newStartTime < appointmentEndTime &&
+        newEndTime > appointment.startTime
+      ) {
+        return true;
+      }
     }
+    return false;
   }
 
   async addNewAppointment(appointment) {
     let saga;
+
+    const { sagaId, ...rest } = appointment;
+
     if (!this.isValidStartTime(appointment.date)) {
       throw new BadRequestException(
         'Appointments can only start on full or half-hours.'
@@ -35,15 +57,22 @@ export class AppointmentService {
       throw new BadRequestException('Appointments cannot span multiple days.');
     }
 
-    const { sagaId, ...rest } = appointment;
+    if (
+      await this.isOverlapping(appointment.date, appointment.duration, sagaId)
+    ) {
+      throw new BadRequestException(
+        'This appointment overlaps with an existing one.'
+      );
+    }
 
     if (sagaId) {
       saga = await this.sagaService.get<any>(sagaId);
-      const newAppointments = [...saga.appointments, rest];
+      const updatedAppointments = [...saga.appointments, rest];
+      const newAppointments = { appointments: updatedAppointments };
       await this.sagaService.upadateSaga(saga, newAppointments);
     }
     {
-      saga = await this.sagaService.makeSaga({ appointments: rest });
+      saga = await this.sagaService.makeSaga({ appointments: [rest] });
     }
 
     return { result: 'OK', sagaId: saga.id };

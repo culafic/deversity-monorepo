@@ -7,8 +7,8 @@ import { AppointmentDto, AppointmentsForDayDto } from '../dto';
 export class AppointmentController {
   constructor(private readonly appointmentService: AppointmentService) {}
   @Get('/:id')
-  async getAllAppointments(@Param('id') id: string, @Req() req: Request) {
-    return this.appointmentService.getAllAppointments(id);
+  async getAppointments(@Param('id') id: string, @Req() req: Request) {
+    return this.appointmentService.getAppointments(id);
   }
 
   @Post('/new')
